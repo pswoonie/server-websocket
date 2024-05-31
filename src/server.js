@@ -23,16 +23,21 @@ function addSockets(socket) {
     (c) => c.rid === socket.roomId && c.uid === socket.userId
   );
 
-  if (result !== null && result !== undefined) return;
+  if (result !== null || result !== undefined || result.length == 0) {
+    const newRoom = { socket: socket, rid: socket.roomId, uid: socket.userId };
+    clients.push(newRoom);
+  }
 
-  const newRoom = { socket: socket, rid: socket.roomId, uid: socket.userId };
-  rooms.push(newRoom);
+  return;
 }
 
 function sendMessage(message) {
-  const result = clients.filter((c) => c.rid === message.rid);
+  const result = clients.filter(
+    (c) => c.rid === message.rid && c.uid !== message.uid
+  );
 
-  result.forEach((client) => client.socket.send(message));
+  result.forEach((client) => client.socket.send(JSON.stringify(message)));
+  console.log("Message Sent!!!");
 }
 
 wss.on("connection", (socket) => {
